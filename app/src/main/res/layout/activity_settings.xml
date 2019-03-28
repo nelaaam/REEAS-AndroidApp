@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".SettingsActivity">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorText"
+        android:textAllCaps="true"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/avenirnextltpro_bold"
+        android:text="lezgaw"
+        />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/alert_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Alert"
+        android:key="alertSwitch"/>
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/alert_sounds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:text="Sound" />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/alert_vibrate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:text="Vibrate" />
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/alert_notif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notification" />
+
+</LinearLayout>

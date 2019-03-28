@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "501851685370",
+    "firebase_url": "https://earthquake-alert-c9780.firebaseio.com",
+    "project_id": "earthquake-alert-c9780",
+    "storage_bucket": "earthquake-alert-c9780.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501851685370:android:9208d749389fe838",
+        "android_client_info": {
+          "package_name": "com.example.nela.earthquakealert"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501851685370-qr1sc5gvfsq68se8s644h9n0hb8trebi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nela.earthquakealert",
+            "certificate_hash": "f863880096de63f1e6c5baa2b76e9d931a685a09"
+          }
+        },
+        {
+          "client_id": "501851685370-cv7cgm48k3v4upa3s6b1003brbh7fdan.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5973qkRbHcgbWQT0FHgvEBo4AUB8GYqE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501851685370-cv7cgm48k3v4upa3s6b1003brbh7fdan.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,31 @@
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:id="@+id/alert_switch"
+        android:defaultValue="false"
+        android:title="Alert"
+        android:key="alertSwitch"
+        android:summary="Turns the Alert on or off" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:id="@+id/alert_sounds"
+        android:defaultValue="true"
+        android:title="Sound"
+        android:key="alertSound"
+        android:summary="Turns the Sound on or off" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:id="@+id/alert_vibrate"
+        android:defaultValue="true"
+        android:title="Vibration"
+        android:key="alertVibrate"
+        android:summary="Turns the Vibration on or off" />
+
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:id="@+id/alert_notif"
+        android:defaultValue="true"
+        android:title="Notification"
+        android:key="alertNotification"
+        android:summary="Turns the Notification on or off" />
+
+</PreferenceScreen>
