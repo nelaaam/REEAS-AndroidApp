@@ -16,7 +16,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -36,13 +41,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Dashboard extends AppCompatActivity {
+public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener {
     public static final int PERMISSION_REQUEST_CODE = 1;
     String urlAddress = "http://www.reeas-web.com:3001/earthquakes";
     ListView listView;
     List<EventsData> dataList;
     EventsData d;
 
+    Spinner s1,s2;
+    Button b1;
+    String state[]=null;
+    String S;
     Switch alertSwitch, alertSound, alertVibrate, alertNotification;
 
     //private BroadcastReceiver broadcastReceiver;
@@ -140,7 +149,15 @@ public class Dashboard extends AppCompatActivity {
     private void setLayout() {
         if (connected) {
             setContentView(R.layout.activity_dashboard);
+            s1 = findViewById(R.id.spinner2);
+            s2 = findViewById(R.id.spinner3);
+            b1 = findViewById(R.id.button2);
             listView = findViewById(R.id.dashboard_feed);
+
+            s1.setOnItemSelectedListener(this);
+            b1.setOnClickListener(this);
+
+
             swipeRefreshLayout = findViewById(R.id.feed_connected);
             dataList = new ArrayList<>();
             swipeFunction();
@@ -210,4 +227,30 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if(position==0){
+            state=new String[]{"9","8","7","6","5"};
+        }
+        if(position==1){
+            state=new String[]{"5","4","3","2","1"};
+        }
+        if(position==2){
+            state=new String[]{"9","8","7","6","5"};
+        }
+        ArrayAdapter<String> adt=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,state);
+        s2.setAdapter(adt);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    @Override
+    public void onClick(View parent) {
+        String yearP = s1.getSelectedItem().toString();
+        String magn = s2.getSelectedItem().toString();
+        S = "http://reeas-web.com:3001/earthquakes/"+ yearP + "?magnitude=" + magn;
+    }
 }
