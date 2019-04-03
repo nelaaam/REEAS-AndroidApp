@@ -7,10 +7,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-public class GPSService implements LocationListener {
+public class GPSTracker implements LocationListener {
     private Context context;
     private Location location;
-    public GPSService(Context c) {
+    public GPSTracker(Context c) {
         context = c;
     }
 

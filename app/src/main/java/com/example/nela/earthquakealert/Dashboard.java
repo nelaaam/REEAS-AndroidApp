@@ -9,68 +9,176 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.example.nela.earthquakealert.Adapter.EarthquakeListAdapter;
+import com.example.nela.earthquakealert.Adapter.EarthquakeEventsAdapter;
 import com.example.nela.earthquakealert.Model.EventsData;
+import com.example.nela.earthquakealert.Service.GPSTracker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
-public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener {
+public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+    private static final String TAG = "Dashboard";
     public static final int PERMISSION_REQUEST_CODE = 1;
-    String urlAddress = "http://www.reeas-web.com:3001/earthquakes";
-    ListView listView;
-    List<EventsData> dataList;
+    GPSTracker locator;
+    RecyclerView recyclerView;
+    RecyclerView.Adapter rvAdapter;
+    RecyclerView.LayoutManager rvLayoutManager;
+    String baseUrl = "http://www.reeas-web.com:3001/earthquakes";
+    String requestUrl;
+    ArrayList<EventsData> dataList = new ArrayList<>();
     EventsData d;
+    Spinner spinnerYear, spinnerMagnitude;
+    String yearSelected, magSelected;
+    Button filterButton;
+    String state[] = null;
+    int start = 0;
+    int visibleItemCount, totalItemCount, pastVisibleItems, previousTotal = 0, viewThreshold = 10;
+    boolean connected = false, yearFilterAdded = false, magFilterAdded = false, isLoading = true;
 
-    Spinner s1,s2;
-    Button b1;
-    String state[]=null;
-    String S;
-    Switch alertSwitch, alertSound, alertVibrate, alertNotification;
-
-    //private BroadcastReceiver broadcastReceiver;
-    boolean connected = false;
-    SwipeRefreshLayout swipeRefreshLayout;
-  //  URL url = new URL("http://www.reeas-web.com:3000/androidclient/route/earthquakes");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         runtime_permissions();
         checkConnectivity();
+    }
+
+    private void setLayout() {
+        if (connected) {
+            if (!yearFilterAdded) {
+                requestUrl = baseUrl;
+            }
+            Log.d(TAG, "Connected");
+            setContentView(R.layout.activity_dashboard);
+            recyclerView = findViewById(R.id.dashboard_feed);
+            recyclerView.setHasFixedSize(true);
+            rvLayoutManager = new LinearLayoutManager(this);
+            getEarthquakeEvents();
+
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    visibleItemCount = rvLayoutManager.getChildCount();
+                    totalItemCount = rvLayoutManager.getItemCount();
+
+                    if(dy > 0) {
+                        if(isLoading) {
+                            if(totalItemCount > previousTotal){
+                                isLoading = false;
+                                previousTotal = totalItemCount;
+                            }
+                        } else if(!isLoading) {
+                            start = start + 10;
+                            getEarthquakeEvents();
+                            isLoading = true;
+                        }
+                    }
+
+                }
+            });
+
+            spinnerYear = findViewById(R.id.spinner2);
+            spinnerMagnitude = findViewById(R.id.spinner3);
+            filterButton = findViewById(R.id.button2);
+            filterButton.setEnabled(false);
+
+
+            spinnerYear.setOnItemSelectedListener(this);
+            spinnerMagnitude.setOnItemSelectedListener(this);
+            filterButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    start = 0;
+                    getEarthquakeEvents();
+                }
+            });
+
+        } else if (!connected) {
+            setContentView(R.layout.dashboard_noconnection);
+            Toast.makeText(Dashboard.this, "Check your internet connection", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void checkConnectivity() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            connected = true;
+        } else connected = false;
         setLayout();
-        //TODO: Turn off on settings per user authorization
-        //FirebaseMessaging.getInstance().subscribeToTopic("ALERT_NOTIFICATIONS");
+    }
 
+    private void getEarthquakeEvents() {
+        if (yearFilterAdded && !magFilterAdded) requestUrl = baseUrl + "/" + yearSelected + "?start=" + start;
+        else if (magFilterAdded && !yearFilterAdded) requestUrl = baseUrl + "?start=" + start + "&&magnitude=" + magSelected;
+        else if(magFilterAdded && yearFilterAdded) requestUrl = baseUrl + "/" + yearSelected + "/" + magFilterAdded + "?start=" + start;
 
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            String status = obj.getString("status");
+                            if (status.equals("ok")){
+                                JSONArray array = obj.getJSONArray("data");
 
-   //    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-   //     con.setRequestMethod("POST");
+                                for (int i = 0; i < array.length(); i++) {
+                                    JSONObject dObj = array.getJSONObject(i);
+                                    String dt = dObj.getString("datetime");
+                                    String[] str = dt.split("T");
+                                    String date = str[0]; // 004
+                                    String time = str[1]; // 034556
+                                    String[] str2 = time.split("Z");
+                                    time = str2[0];
+                                    String latitude = String.format("%.2f", Double.valueOf(dObj.getString("latitude")));
+                                    String longitude = String.format("%.2f", Double.valueOf(dObj.getString("longitude")));
+                                    String location = dObj.getString("location");
+                                    String magnitude = String.format("%.2f", Double.valueOf(dObj.getString("magnitude")));
+                                    d = new EventsData(date, time, latitude, longitude, location, magnitude);
+                                    dataList.add(d);
+                                }
+                                rvAdapter = new EarthquakeEventsAdapter(dataList);
+                                recyclerView.setLayoutManager(rvLayoutManager);
+                                recyclerView.setAdapter(rvAdapter);
+                            } else if (status.equals("end")){
+                                Toast.makeText(Dashboard.this, "No More Available Events", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(Dashboard.this, "Check your internet connection", Toast.LENGTH_LONG).show();
+            }
+        }
+        ) {
+        };
+        AdapterHandler.getInstance(getApplicationContext()).addToRequestQue(stringRequest);
+
     }
 
     @Override
@@ -99,158 +207,55 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PERMISSION_REQUEST_CODE) {
-            if(resultCode == RESULT_OK) {
-                //TODO: Open Dashboard
-                Intent i = new Intent(this,Dashboard.class);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Intent i = new Intent(this, Dashboard.class);
             }
         }
     }
 
 
-    private void showList() {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, urlAddress,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject obj = new JSONObject(response);
-                            JSONArray array = obj.getJSONArray("data");
-
-                            for (int i = 0; i < array.length(); i++) {
-                                JSONObject dObj = array.getJSONObject(i);
-                                String dt = dObj.getString("datetime");
-
-                                String[] str = dt.split("T");
-                                String Date = str[0]; // 004
-                                String Time = str[1]; // 034556
-                                d = new EventsData(Date, dObj.getString("epicenter"), dObj.getString("hypocenter"), Time, dObj.getString("magnitude"));
-                                dataList.add(d);
-                            }
-                            EarthquakeListAdapter adapter = new EarthquakeListAdapter(dataList,getApplicationContext());
-                            listView.setAdapter(adapter);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //TODO: AdapterHandler Error(Notify to check internet connection)
-            }
-        }
-        ) {
-        };
-        AdapterHandler.getInstance(getApplicationContext()).addToRequestQue(stringRequest);
-
-    }
-
-    private void setLayout() {
-        if (connected) {
-            setContentView(R.layout.activity_dashboard);
-            s1 = findViewById(R.id.spinner2);
-            s2 = findViewById(R.id.spinner3);
-            b1 = findViewById(R.id.button2);
-            listView = findViewById(R.id.dashboard_feed);
-
-            s1.setOnItemSelectedListener(this);
-            b1.setOnClickListener(this);
-
-
-            swipeRefreshLayout = findViewById(R.id.feed_connected);
-            dataList = new ArrayList<>();
-            swipeFunction();
-            showList();
-
-        } else {
-            setContentView(R.layout.dashboard_noconnection);
-            if(!connected) {
-                Toast.makeText(Dashboard.this, "No Internet Connection",Toast.LENGTH_SHORT).show();
-            }
-            swipeRefreshLayout = findViewById(R.id.feed_notconnected);
-            swipeFunction();
-        }
-    }
     private void runtime_permissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, PERMISSION_REQUEST_CODE);
             }
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},100);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
             }
         }
-    }
-    private void checkConnectivity() {
-        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-            connected = true;
-        }
-        else connected = false;
-    }
-    private void swipeFunction() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                checkConnectivity();
-                if(!connected) {
-                    Toast.makeText(Dashboard.this, "Not Connected",Toast.LENGTH_SHORT).show();
-                }
-                setLayout();
-                new Handler().postDelayed(new Runnable() {
-                    @Override public void run() {
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                }, 6000);
-            }
-        });
-    }
-    public static Date parse( String input ) throws java.text.ParseException {
-
-        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssz" );
-
-        if ( input.endsWith( "Z" ) ) {
-            input = input.substring( 0, input.length() - 1) + "GMT-00:00";
-        } else {
-            int inset = 6;
-
-            String s0 = input.substring( 0, input.length() - inset );
-            String s1 = input.substring( input.length() - inset, input.length() );
-
-            input = s0 + "GMT" + s1;
-        }
-
-        return df.parse( input );
-
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if(position==0){
-            state=new String[]{"9","8","7","6","5"};
+        yearSelected = spinnerYear.getSelectedItem().toString();
+        magSelected = spinnerMagnitude.getSelectedItem().toString();
+        if(!filterButton.isEnabled()) {
+            if (!yearSelected.equals("SELECTED")) yearFilterAdded = true;
+            if (!magSelected.equals("SELECTED")) magFilterAdded = true;
+            filterButton.setEnabled(true);
+        } else if(filterButton.isEnabled()){
+            if(yearSelected.equals("SELECTED")) yearFilterAdded = false;
+            if(magSelected.equals("SELECTED")) magFilterAdded = false;
+            if(magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
+                filterButton.setEnabled(false);
+                requestUrl = baseUrl;
+            }
         }
-        if(position==1){
-            state=new String[]{"5","4","3","2","1"};
-        }
-        if(position==2){
-            state=new String[]{"9","8","7","6","5"};
-        }
-        ArrayAdapter<String> adt=new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,state);
-        s2.setAdapter(adt);
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    @Override
-    public void onClick(View parent) {
-        String yearP = s1.getSelectedItem().toString();
-        String magn = s2.getSelectedItem().toString();
-        S = "http://reeas-web.com:3001/earthquakes/"+ yearP + "?magnitude=" + magn;
+        yearSelected = spinnerYear.getSelectedItem().toString();
+        magSelected = spinnerMagnitude.getSelectedItem().toString();
+        if(filterButton.isEnabled()) {
+            if(yearSelected.equals("SELECTED")) yearFilterAdded = false;
+            if(magSelected.equals("SELECTED")) magFilterAdded = false;
+            if(magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
+                filterButton.setEnabled(false);
+                requestUrl = baseUrl;
+            }
+        }
     }
 }

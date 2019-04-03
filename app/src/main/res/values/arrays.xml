@@ -1,30 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="yearPrime">
+    <string-array name="yearSelection">
+        <item>SELECT</item>
         <item>2019</item>
         <item>2018</item>
         <item>2017</item>
     </string-array>
-    <string-array name="magnitude_1">
-        <item>9.0</item>
-        <item>8.0</item>
-        <item>7.0</item>
-        <item>6.0</item>
+    <string-array name="magnitudeSelection">
+        <item>SELECT</item>
+        <item>1.0</item>
+        <item>2.0</item>
+        <item>3.0</item>
+        <item>4.0</item>
         <item>5.0</item>
-    </string-array>
-    <string-array name="magnitude_2">
-        <item>9.0</item>
-        <item>8.0</item>
-        <item>7.0</item>
         <item>6.0</item>
-        <item>5.0</item>
-    </string-array>
-    <string-array name="magnitude_3">
-        <item>9.0</item>
-        <item>8.0</item>
         <item>7.0</item>
-        <item>6.0</item>
-        <item>5.0</item>
+        <item>8.0</item>
+        <item>9.0</item>
+        <item>10.0</item>
     </string-array>
+
 
 </resources>

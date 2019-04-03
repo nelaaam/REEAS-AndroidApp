@@ -18,8 +18,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.nela.earthquakealert.Service.GPSService;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +30,7 @@ public class Alert extends Activity {
     int min, sec;
     private boolean timerRunning = false;
     private CountDownTimer countDownTimer;
-    GPSService locator;
+
     String mag, loc;
     double elat, elong, clat, clong, distance;
     double count;
@@ -73,7 +71,7 @@ public class Alert extends Activity {
         registerReceiver(UpdateUI,filter);
 
 
-      /*  locator = new GPSService(getApplicationContext());
+      /*  locator = new GPSTracker(getApplicationContext());
         Location l = locator.getLocation();
         clat = l.getLatitude();
         clong = l.getLongitude();

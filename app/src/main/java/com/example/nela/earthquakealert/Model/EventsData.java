@@ -2,30 +2,33 @@ package com.example.nela.earthquakealert.Model;
 
 public class EventsData {
 
-    private String date, location, hypocenter, time, magnitude;
+    private String date, time, latitude, longitude, location, magnitude;
 
-    public EventsData(String date, String location, String hypocenter, String time, String magnitude) {
+    public EventsData(String date, String time, String latitude, String longitude, String location, String magnitude) {
         this.date = date;
-        this.location = location;
-        this.hypocenter = hypocenter;
         this.time = time;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.magnitude = magnitude;
+        this.location = location;
     }
 
     public String getDate() {
         return date;
     }
 
+    public String getTime() { return time; }
+
     public String getLocation() {
         return location;
     }
 
-    public String getHypocenter() {
-        return hypocenter;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public String getTime() {
-        return time;
+    public String getLongitude() {
+        return longitude;
     }
 
     public String getMagnitude() {
