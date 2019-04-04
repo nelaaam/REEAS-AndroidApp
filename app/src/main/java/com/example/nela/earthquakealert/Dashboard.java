@@ -4,12 +4,14 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,7 +42,6 @@ import java.util.ArrayList;
 public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
     private static final String TAG = "Dashboard";
     public static final int PERMISSION_REQUEST_CODE = 1;
-    GPSTracker locator;
     RecyclerView recyclerView;
     RecyclerView.Adapter rvAdapter;
     RecyclerView.LayoutManager rvLayoutManager;
@@ -51,10 +52,11 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
     Spinner spinnerYear, spinnerMagnitude;
     String yearSelected, magSelected;
     Button filterButton;
-    String state[] = null;
     int start = 0;
     int visibleItemCount, totalItemCount, pastVisibleItems, previousTotal = 0, viewThreshold = 10;
     boolean connected = false, yearFilterAdded = false, magFilterAdded = false, isLoading = true;
+    Button b1, b2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +103,22 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             spinnerYear = findViewById(R.id.spinner2);
             spinnerMagnitude = findViewById(R.id.spinner3);
             filterButton = findViewById(R.id.button2);
+            b2 = findViewById(R.id.getLocbtn);
             filterButton.setEnabled(false);
+
+            ActivityCompat.requestPermissions(Dashboard.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},123);
+            b2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    GPSTracker g = new GPSTracker(getApplicationContext());
+                    Location location = g.getLocation();
+                    if(location != null){
+                        double lat = location.getLatitude();
+                        double lon = location.getLongitude();
+                        Toast.makeText(getApplicationContext(),"Lat: "+lat+" \n Lon: "+lon,Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
 
 
             spinnerYear.setOnItemSelectedListener(this);
@@ -213,7 +230,6 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             }
         }
     }
-
 
     private void runtime_permissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
