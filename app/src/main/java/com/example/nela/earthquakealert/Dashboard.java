@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +33,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nela.earthquakealert.Adapter.EarthquakeListAdapter;
 import com.example.nela.earthquakealert.Model.EventsData;
+import com.example.nela.earthquakealert.Service.GPSService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +52,7 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
     EventsData d;
 
     Spinner s1,s2;
-    Button b1;
+    Button b1,b2;
     String state[]=null;
     String S;
     Switch alertSwitch, alertSound, alertVibrate, alertNotification;
@@ -152,10 +155,25 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             s1 = findViewById(R.id.spinner2);
             s2 = findViewById(R.id.spinner3);
             b1 = findViewById(R.id.button2);
+            b2 = findViewById(R.id.getLocbtn);
             listView = findViewById(R.id.dashboard_feed);
 
             s1.setOnItemSelectedListener(this);
             b1.setOnClickListener(this);
+
+            ActivityCompat.requestPermissions(Dashboard.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},123);
+            b2.setOnClickListener(new View.OnClickListener() {
+                                  @Override
+                                  public void onClick(View v) {
+                                      GPSService g = new GPSService(getApplicationContext());
+                                      Location location = g.getLocation();
+                                      if(location != null){
+                                          double lat = location.getLatitude();
+                                          double lon = location.getLongitude();
+                                          Toast.makeText(getApplicationContext(),"Lat: "+lat+" \n Lon: "+lon,Toast.LENGTH_LONG).show();
+                                      }
+                                  }
+                                });
 
 
             swipeRefreshLayout = findViewById(R.id.feed_connected);
@@ -172,6 +190,8 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             swipeFunction();
         }
     }
+
+
     private void runtime_permissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(this)) {

@@ -63,6 +63,18 @@
             android:layout_marginRight="26dp"
             android:layout_marginBottom="12dp"
             android:text="@string/filTer" />
+
+        <Button
+            android:id="@+id/getLocbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="56dp"
+            android:layout_marginRight="56dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/fil" />
     </RelativeLayout>
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/feed_connected"

@@ -94,5 +94,6 @@
     <string name="yearPrompt">Year</string>
     <string name="magPrompt">Magnitude</string>
     <string name="filTer">Filter</string>
+    <string name="fil">GetLoc</string>
 
 </resources>
