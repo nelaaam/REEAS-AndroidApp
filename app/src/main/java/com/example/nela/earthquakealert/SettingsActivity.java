@@ -9,10 +9,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 
 public class SettingsActivity extends AppCompatActivity {
-
-    Boolean vibration;
+    private static final String ALERTS_ENABLED = "Alert_Enabled";
+    private static final String SOUNDS_ENABLED = "Alert_Enabled";
+    private static final String VIBRATOR_ENABLED = "Alert_Enabled";
+    private static final String NOTIFICATIONS_ENABLED = "Alert_Enabled";
     SwitchCompat alertSwitch, alertSound, alertVibrate, alertNotification;
-    boolean SW1,SW2,SW3,SW4;
+    boolean alertEnabled, soundEnabled, vibEnabled, notifEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,58 +22,74 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         final SharedPreferences sharedPreferences = getSharedPreferences("PREFS", 0);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        SW1 = sharedPreferences.getBoolean("SWITCH1", false);
-        SW2 = sharedPreferences.getBoolean("SWITCH2", false);
-        SW3 = sharedPreferences.getBoolean("SWITCH3", false);
-        SW4 = sharedPreferences.getBoolean("SWITCH4", false);
+        alertEnabled = sharedPreferences.getBoolean(ALERTS_ENABLED, true);
+        soundEnabled = sharedPreferences.getBoolean(SOUNDS_ENABLED, false);
+        vibEnabled = sharedPreferences.getBoolean(VIBRATOR_ENABLED, false);
+        notifEnabled = sharedPreferences.getBoolean(NOTIFICATIONS_ENABLED, true);
 
         alertSwitch = (SwitchCompat) findViewById(R.id.alert_switch);
         alertSound = (SwitchCompat) findViewById(R.id.alert_sounds);
         alertVibrate = (SwitchCompat) findViewById(R.id.alert_vibrate);
         alertNotification = (SwitchCompat) findViewById(R.id.alert_notif);
 
-        alertSwitch.setChecked(SW1);
-        alertSound.setChecked(SW2);
-        alertVibrate.setChecked(SW3);
-        alertNotification.setChecked(SW4);
+        alertSwitch.setChecked(alertEnabled);
+        alertSound.setChecked(soundEnabled);
+        alertVibrate.setChecked(vibEnabled);
+        alertNotification.setChecked(notifEnabled);
+        if(!alertEnabled) {
+            alertSound.setEnabled(false);
+            alertVibrate.setEnabled(false);
+        } else {
+            alertSound.setEnabled(true);
+            alertVibrate.setEnabled(true);
+        }
 
 
         alertSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SW1 = !SW1;
-                alertSwitch.setChecked(SW1);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("SWITCH1", SW1);
+                alertEnabled = !alertEnabled;
+                alertSwitch.setChecked(alertEnabled);
+                editor.putBoolean(ALERTS_ENABLED, alertEnabled);
                 editor.apply();
                 if(isChecked){
-                    FirebaseMessaging.getInstance().subscribeToTopic("ALERT_NOTIFICATIONS");
-                    alertSound.setEnabled(true);
-                    alertVibrate.setEnabled(true);
+                    FirebaseMessaging.getInstance().subscribeToTopic("ALERT");
                 }
                 else {
-                    FirebaseMessaging.getInstance().subscribeToTopic("NO_NOTIFICATIONS");
-                    alertSound.setEnabled(false);
-                    alertVibrate.setEnabled(false);
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("ALERT");
+                    if (alertSound.isEnabled()) {
+                        alertSound.setEnabled(false);
+                        alertSound.setChecked(false);
+                        editor.putBoolean(SOUNDS_ENABLED, false);
+                    }
+                    if (alertVibrate.isEnabled()) {
+                        alertVibrate.setEnabled(false);
+                        alertVibrate.setChecked(false);
+                        editor.putBoolean(VIBRATOR_ENABLED, false);
+                    }
+                    editor.apply();
                 }
-
             };
         });
 
         alertSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SW2 = !SW2;
-                alertSound.setChecked(SW2);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("SWITCH2", SW2);
-                editor.apply();
-                //if (isChecked) {
-                //TODO: Enable sounds
-                //} else {
-                //TODO: Disable Sounds
-                // }
+                if (alertEnabled){
+                    soundEnabled = !soundEnabled;
+                    alertSound.setChecked(soundEnabled);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(SOUNDS_ENABLED, soundEnabled);
+                    editor.apply();
+                    //if (isChecked) {
+                    //TODO: Enable sounds
+                    //} else {
+                    //TODO: Disable Sounds
+                    // }
+                }
+
 
             };
         });
@@ -79,28 +97,41 @@ public class SettingsActivity extends AppCompatActivity {
         alertVibrate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SW3 = !SW3;
-                alertVibrate.setChecked(SW3);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("SWITCH3", SW3);
-                editor.apply();
-                if (isChecked) {
-                    setVibration(true);
+                if (alertEnabled){
+                    vibEnabled = !vibEnabled;
+                    alertVibrate.setChecked(vibEnabled);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(VIBRATOR_ENABLED, vibEnabled);
+                    editor.apply();
+                    if (isChecked) {
+                        //setVibration(true);
+                        //TODO: Set vibration
+                    }
+                    else {
+                        //setVibration(false);
+                    }
                 }
-                else {
-                    setVibration(false);
-                }
+
 
             };
         });
-    }
 
-    public void setVibration(boolean v) {
-        vibration = v;
-    }
+        alertNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                alertEnabled = !alertEnabled;
+                alertSwitch.setChecked(alertEnabled);
+                editor.putBoolean(ALERTS_ENABLED, alertEnabled);
+                editor.apply();
+                if(isChecked){
+                    FirebaseMessaging.getInstance().subscribeToTopic("NOTIFICATIONS");
+                } else {
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("NOTIFICATIONS");
+                }
 
-    public boolean getVibration() {
-        return vibration;
+
+            };
+        });
     }
 }
 

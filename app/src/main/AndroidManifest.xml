@@ -18,12 +18,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".SettingsActivity"
+        <activity
+            android:name=".SettingsActivity"
             android:label="Settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".Dashboard">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".Dashboard" />
         </activity>
         <activity
             android:name=".Dashboard"
@@ -44,14 +45,6 @@
                 android:value=".Dashboard" />
         </activity>
         <activity
-            android:name=".Setting"
-            android:label="Settings"
-            android:parentActivityName=".Dashboard">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Dashboard" />
-        </activity>
-        <activity
             android:name=".Alert"
             android:theme="@style/AppTheme.PopMe">
             <intent-filter>
@@ -59,13 +52,16 @@
             </intent-filter>
         </activity>
 
-
         <service
             android:name=".Service.FirebaseHandler"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
+        </service>
+        <service
+            android:name=".Service.GPSTracker"
+            android:enabled="true">
         </service>
     </application>
 
