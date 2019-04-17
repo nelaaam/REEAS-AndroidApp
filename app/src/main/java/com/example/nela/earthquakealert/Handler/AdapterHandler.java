@@ -1,4 +1,4 @@
-package com.example.nela.earthquakealert;
+package com.example.nela.earthquakealert.Handler;
 
 import android.content.Context;
 

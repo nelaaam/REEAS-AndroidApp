@@ -7,28 +7,29 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 
 public class About extends AppCompatActivity {
 
-    TextView versionInformation, contactInformation, supportInformation;
-   // Button btn_versionInfo, btn_contactInfo, btn_supportInfo;
+    LinearLayout versionInformation, contactInformation, supportInformation;
+    // Button btn_versionInfo, btn_contactInfo, btn_supportInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        versionInformation = findViewById(R.id.content_version);
-        contactInformation = findViewById(R.id.content_contact);
-        supportInformation = findViewById(R.id.content_support);
+        versionInformation = findViewById(R.id.version_information_content);
+        contactInformation = findViewById(R.id.contact_us_content);
+        supportInformation = findViewById(R.id.support_us_content);
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_appbar, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -51,8 +52,8 @@ public class About extends AppCompatActivity {
 
     public void showAboutContent(View view) {
         contactInformation.setVisibility(View.VISIBLE);
-        if (view.getId() == R.id.btn_contact){
-           contactInformation.setVisibility(View.VISIBLE);
+        if (view.getId() == R.id.btn_contact) {
+            contactInformation.setVisibility(View.VISIBLE);
             supportInformation.setVisibility(View.GONE);
             versionInformation.setVisibility(View.GONE);
         } else if (view.getId() == R.id.btn_support) {

@@ -17,7 +17,7 @@
         android:textAllCaps="true"
         android:layout_marginBottom="20dp"
         android:fontFamily="@font/avenirnextltpro_bold"
-        android:text="lezgaw"
+        android:text="@string/title_activity_settings"
         />
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/alert_switch"

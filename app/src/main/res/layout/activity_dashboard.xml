@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="@string/content_dashboardTitle"
+        android:text="@string/title_activity_dashboard"
         android:textAllCaps="true"
         android:textSize="20sp"
         app:fontFamily="@font/avenirnextltpro_bold" />
@@ -36,7 +36,7 @@
             android:layout_marginEnd="10dp"
             android:layout_marginHorizontal="10dp"
             android:entries="@array/yearSelection"
-            android:prompt="@string/selectPrompt"
+            android:prompt="@string/card_view_select_prompt"
             android:visibility="visible" />
 
         <Spinner
@@ -47,7 +47,7 @@
             android:layout_marginRight="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginHorizontal="10dp"
-            android:prompt="@string/selectPrompt"
+            android:prompt="@string/card_view_select_prompt"
             android:entries="@array/magnitudeSelection"
             android:visibility="visible"
            />
@@ -57,7 +57,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:text="@string/filter" />
+            android:text="@string/filter_button_add" />
+
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView

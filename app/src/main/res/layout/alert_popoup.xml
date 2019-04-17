@@ -123,7 +123,7 @@
             android:text="@string/alert_title"
             android:textAllCaps="true"
             android:textColor="@color/colorHeader"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:fontFamily="@font/avenirnextltpro_bold" />
 
     </LinearLayout>

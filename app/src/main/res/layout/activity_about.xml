@@ -33,14 +33,54 @@
             android:gravity="start"
             android:onClick="showAboutContent"
             android:padding="16dp"
-            android:text="Version 6.2 Information" />
-        <TextView
-            android:id="@+id/content_version"
-            android:layout_width="wrap_content"
+            android:text="@string/content_title_version" />
+        <LinearLayout
+            android:id="@+id/version_information_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/content_appVersion"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:layout_margin="20dp"/>
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_version_number"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/avenirnextltpro_bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_feature_1"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_feature_2"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_feature_3"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_feature_4"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_feature_5"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/btn_contact"
@@ -51,13 +91,28 @@
             android:onClick="showAboutContent"
             android:padding="16dp"
             android:text="Contact Us" />
-        <TextView
-            android:id="@+id/content_contact"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/contact_us_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/content_appVersion"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:layout_margin="20dp"/>
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_title_contact_1"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/avenirnextltpro_bold"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_contact_1"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"/>
+        </LinearLayout>
 
         <Button
             android:id="@+id/btn_support"
@@ -68,15 +123,22 @@
             android:onClick="showAboutContent"
             android:padding="16dp"
             android:text="Support Our Research" />
-        <TextView
-            android:id="@+id/content_support"
-            android:layout_width="wrap_content"
+
+        <LinearLayout
+            android:id="@+id/support_us_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/content_appVersion"
+            android:orientation="vertical"
             android:visibility="gone"
-            android:layout_margin="20dp"/>
-
-
-
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/content_coming_soon"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/avenirnextltpro_bold"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -34,6 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
         alertVibrate = (SwitchCompat) findViewById(R.id.alert_vibrate);
         alertNotification = (SwitchCompat) findViewById(R.id.alert_notif);
 
+        //Initialization
         alertSwitch.setChecked(alertEnabled);
         alertSound.setChecked(soundEnabled);
         alertVibrate.setChecked(vibEnabled);
@@ -42,11 +43,21 @@ public class SettingsActivity extends AppCompatActivity {
             alertSound.setEnabled(false);
             alertVibrate.setEnabled(false);
         } else {
-            alertSound.setEnabled(true);
-            alertVibrate.setEnabled(true);
+            FirebaseMessaging.getInstance().subscribeToTopic("ALERT");
+            if (!alertSound.isEnabled()) {
+                alertSound.setEnabled(true);
+                editor.putBoolean(SOUNDS_ENABLED, false);
+            }
+            if (!alertVibrate.isEnabled()) {
+                alertVibrate.setEnabled(true);
+                editor.putBoolean(VIBRATOR_ENABLED, false);
+            }
+        }
+        if (notifEnabled) {
+            FirebaseMessaging.getInstance().subscribeToTopic("NOTIFICATIONS");
         }
 
-
+        //Check change listener
         alertSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -56,6 +67,12 @@ public class SettingsActivity extends AppCompatActivity {
                 editor.apply();
                 if(isChecked){
                     FirebaseMessaging.getInstance().subscribeToTopic("ALERT");
+                    if (!alertSound.isEnabled()) {
+                        alertSound.setEnabled(true);
+                    }
+                    if (!alertVibrate.isEnabled()) {
+                        alertVibrate.setEnabled(true);
+                    }
                 }
                 else {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic("ALERT");
@@ -88,6 +105,8 @@ public class SettingsActivity extends AppCompatActivity {
                     //} else {
                     //TODO: Disable Sounds
                     // }
+                } else {
+                    alertSound.setEnabled(false);
                 }
 
 
@@ -110,6 +129,8 @@ public class SettingsActivity extends AppCompatActivity {
                     else {
                         //setVibration(false);
                     }
+                } else {
+                    alertVibrate.setEnabled(false);
                 }
 
 

@@ -4,14 +4,12 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +28,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nela.earthquakealert.Adapter.EarthquakeEventsAdapter;
+import com.example.nela.earthquakealert.Handler.AdapterHandler;
 import com.example.nela.earthquakealert.Model.EventsData;
 import com.example.nela.earthquakealert.Service.GPSTracker;
 
@@ -39,7 +38,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "Dashboard";
     public static final int PERMISSION_REQUEST_CODE = 1;
     RecyclerView recyclerView;
@@ -63,11 +62,12 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
         super.onCreate(savedInstanceState);
         runtime_permissions();
         checkConnectivity();
+        setLayout();
     }
 
     private void setLayout() {
         if (connected) {
-            if (!yearFilterAdded) {
+            if (!yearFilterAdded && !magFilterAdded) {
                 requestUrl = baseUrl;
             }
             Log.d(TAG, "Connected");
@@ -81,21 +81,30 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
+
                     visibleItemCount = rvLayoutManager.getChildCount();
                     totalItemCount = rvLayoutManager.getItemCount();
-
-                    if(dy > 0) {
-                        if(isLoading) {
-                            if(totalItemCount > previousTotal){
-                                isLoading = false;
-                                previousTotal = totalItemCount;
+                    Log.d(TAG, "VIC = " + visibleItemCount);
+                    Log.d(TAG, "TIC = " + totalItemCount);
+                    if (dy > 0) {
+                        checkConnectivity();
+                        if(connected){
+                            if (isLoading) {
+                                if (totalItemCount > previousTotal) {
+                                    isLoading = false;
+                                    previousTotal = totalItemCount;
+                                }
+                            } else if (!isLoading) {
+                                start = start + 10;
+                                getEarthquakeEvents();
+                                isLoading = true;
                             }
-                        } else if(!isLoading) {
-                            start = start + 10;
-                            getEarthquakeEvents();
-                            isLoading = true;
+                        }else {
+                            Toast.makeText(Dashboard.this, "Check your internet connection", Toast.LENGTH_LONG).show();
                         }
+
                     }
+
 
                 }
             });
@@ -103,23 +112,11 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             spinnerYear = findViewById(R.id.spinner2);
             spinnerMagnitude = findViewById(R.id.spinner3);
             filterButton = findViewById(R.id.button2);
-            b2 = findViewById(R.id.getLocbtn);
+
             filterButton.setEnabled(false);
 
-            ActivityCompat.requestPermissions(Dashboard.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},123);
-            b2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    GPSTracker g = new GPSTracker(getApplicationContext());
-                    Location location = g.getLocation();
-                    if(location != null){
-                        double lat = location.getLatitude();
-                        double lon = location.getLongitude();
-                        Toast.makeText(getApplicationContext(),"Lat: "+lat+" \n Lon: "+lon,Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-
+            Intent i = new Intent(getApplicationContext(), GPSTracker.class);
+            startService(i);
 
             spinnerYear.setOnItemSelectedListener(this);
             spinnerMagnitude.setOnItemSelectedListener(this);
@@ -132,7 +129,6 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
             });
 
         } else if (!connected) {
-            setContentView(R.layout.dashboard_noconnection);
             Toast.makeText(Dashboard.this, "Check your internet connection", Toast.LENGTH_LONG).show();
         }
     }
@@ -143,13 +139,15 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
                 connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
             connected = true;
         } else connected = false;
-        setLayout();
     }
 
     private void getEarthquakeEvents() {
-        if (yearFilterAdded && !magFilterAdded) requestUrl = baseUrl + "/" + yearSelected + "?start=" + start;
-        else if (magFilterAdded && !yearFilterAdded) requestUrl = baseUrl + "?start=" + start + "&&magnitude=" + magSelected;
-        else if(magFilterAdded && yearFilterAdded) requestUrl = baseUrl + "/" + yearSelected + "/" + magFilterAdded + "?start=" + start;
+        if (yearFilterAdded && !magFilterAdded)
+            requestUrl = baseUrl + "/" + yearSelected + "?start=" + start;
+        else if (magFilterAdded && !yearFilterAdded)
+            requestUrl = baseUrl + "?start=" + start + "&&magnitude=" + magSelected;
+        else if (magFilterAdded && yearFilterAdded)
+            requestUrl = baseUrl + "/" + yearSelected + "/" + magSelected + "?start=" + start;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, requestUrl,
                 new Response.Listener<String>() {
@@ -158,7 +156,7 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
                         try {
                             JSONObject obj = new JSONObject(response);
                             String status = obj.getString("status");
-                            if (status.equals("ok")){
+                            if (status.equals("ok")) {
                                 JSONArray array = obj.getJSONArray("data");
 
                                 for (int i = 0; i < array.length(); i++) {
@@ -179,7 +177,7 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
                                 rvAdapter = new EarthquakeEventsAdapter(dataList);
                                 recyclerView.setLayoutManager(rvLayoutManager);
                                 recyclerView.setAdapter(rvAdapter);
-                            } else if (status.equals("end")){
+                            } else if (status.equals("end")) {
                                 Toast.makeText(Dashboard.this, "No More Available Events", Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
@@ -247,14 +245,14 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         yearSelected = spinnerYear.getSelectedItem().toString();
         magSelected = spinnerMagnitude.getSelectedItem().toString();
-        if(!filterButton.isEnabled()) {
+        if (!filterButton.isEnabled()) {
             if (!yearSelected.equals("SELECTED")) yearFilterAdded = true;
             if (!magSelected.equals("SELECTED")) magFilterAdded = true;
             filterButton.setEnabled(true);
-        } else if(filterButton.isEnabled()){
-            if(yearSelected.equals("SELECTED")) yearFilterAdded = false;
-            if(magSelected.equals("SELECTED")) magFilterAdded = false;
-            if(magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
+        } else if (filterButton.isEnabled()) {
+            if (yearSelected.equals("SELECTED")) yearFilterAdded = false;
+            if (magSelected.equals("SELECTED")) magFilterAdded = false;
+            if (magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
                 filterButton.setEnabled(false);
                 requestUrl = baseUrl;
             }
@@ -265,10 +263,10 @@ public class Dashboard extends AppCompatActivity implements AdapterView.OnItemSe
     public void onNothingSelected(AdapterView<?> parent) {
         yearSelected = spinnerYear.getSelectedItem().toString();
         magSelected = spinnerMagnitude.getSelectedItem().toString();
-        if(filterButton.isEnabled()) {
-            if(yearSelected.equals("SELECTED")) yearFilterAdded = false;
-            if(magSelected.equals("SELECTED")) magFilterAdded = false;
-            if(magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
+        if (filterButton.isEnabled()) {
+            if (yearSelected.equals("SELECTED")) yearFilterAdded = false;
+            if (magSelected.equals("SELECTED")) magFilterAdded = false;
+            if (magSelected.equals("SELECTED") && yearSelected.equals("SELECTED")) {
                 filterButton.setEnabled(false);
                 requestUrl = baseUrl;
             }
