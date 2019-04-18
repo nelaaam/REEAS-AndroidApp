@@ -7,12 +7,13 @@
 
     <!--Dashboard Related Strings -->
     <string name="card_view_magnitude">M</string>
-    <string name="title_activity_dashboard">Recent Earthquakes</string>
+    <string name="title_activity_dashboard">Earthquake Feed</string>
     <string name="card_view_select_prompt">Select</string>
     <string name="filter_button_add">Add Filter</string>
 
     <!--About Related Strings-->
-    <string name="content_about">The Earthquake Alert app is part of a thesis project on Rapid Earthquake Estimation and Alert System. This research aims to develop a system that is able to disseminate real-time alerts for earthquakes. The application is currently under development and under testing. The goal of this system and android application is to be able to give its users a few seconds (at least 10 seconds) of warning time to its users. For more information, inquiries, comments, suggestions and reviews, please contact us anytime!</string>
+    <string name="title_activity_about">What is Earthquake Alert?</string>
+    <string name="content_about">Earthquake Alert is part of a thesis project on Rapid Earthquake Estimation and Alert System. Our goal is to create a system to provide the community alert for incoming earthquakes (Even if it\'s just a few seconds!). You're particapation in our research is deeply appreciated! Thank you!</string>
     <string name="content_title_version">Version Information</string>
     <string name="content_feature_1">Earthquake arrival alert (Estimated)</string>
     <string name="content_feature_2">New earthquake recorded notification</string>
@@ -29,6 +30,6 @@
     <string name="alert_title">EARTHQUAKE ALERT!</string>
 
     <!--Settings Related Strings-->
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">General Settings</string>
 
 </resources>

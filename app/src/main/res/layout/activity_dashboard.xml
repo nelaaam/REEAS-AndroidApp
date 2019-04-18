@@ -8,11 +8,22 @@
     tools:context=".Dashboard">
 
     <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/headingColor"
+        android:textAllCaps="true"
+        android:textSize="20sp"
+        android:layout_margin="20dp"
+        android:fontFamily="@font/avenirnextltpro_bold"
+        android:text="@string/title_activity_dashboard"
+        />
+    <TextView
         android:id="@+id/dashboard_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="@string/title_activity_dashboard"
+
         android:textAllCaps="true"
         android:textSize="20sp"
         app:fontFamily="@font/avenirnextltpro_bold" />

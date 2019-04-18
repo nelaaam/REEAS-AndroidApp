@@ -13,9 +13,10 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorText"
+        android:textColor="@color/headingColor"
         android:textAllCaps="true"
         android:layout_marginBottom="20dp"
+        android:textSize="20sp"
         android:fontFamily="@font/avenirnextltpro_bold"
         android:text="@string/title_activity_settings"
         />
@@ -24,23 +25,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Alert"
+        android:textSize="16sp"
         android:key="alertSwitch"/>
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/alert_sounds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
+        android:textSize="16sp"
         android:text="Sound" />
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/alert_vibrate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
+        android:textSize="16sp"
         android:text="Vibrate" />
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/alert_notif"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:text="Notification" />
 
 </LinearLayout>
