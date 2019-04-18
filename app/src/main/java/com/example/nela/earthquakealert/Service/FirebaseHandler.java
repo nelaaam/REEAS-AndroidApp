@@ -57,10 +57,10 @@ public class FirebaseHandler extends FirebaseMessagingService {
                 bundle.putString("Magnitude", magnitude);
 
                 SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, 0);
-              /* SharedPreferences.Editor editor = sharedPreferences.edit();
+               SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor = sharedPreferences.edit();
                 editor.putBoolean(ALERT_ACTIVITY, false);
-                editor.apply();*/
+                editor.apply();
                 boolean alertIsRunning = sharedPreferences.getBoolean(ALERT_ACTIVITY, false);
                 Log.d(TAG, "ALERT IS " + sharedPreferences.getBoolean(ALERT_ACTIVITY, false));
 

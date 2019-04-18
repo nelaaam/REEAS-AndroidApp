@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -30,22 +34,24 @@ public class Alert extends Activity {
     private static final String SHARED_PREFS = "Shared_Prefs";
     private static final String LATITUDE = "Latitude";
     private static final String LONGITUDE = "Longitude";
+    private static final String VIBRATOR_ENABLED = "Vibrator_Enabled";
+    private static final String SOUNDS_ENABLED = "Sounds_Enabled";
+    private CountDownTimer countDownTimer;
     private WindowManager windowManager;
     private View alertView;
     private TextView magnitude, location, timerView;
     private int min, sec, eStart;
-    private boolean timerRunning = false;
-    private CountDownTimer countDownTimer;
+    private boolean timerRunning = false, vibrate = false, sound = false;
     private long counter;
     private String mag, loc, alertTime, event_start;
     private double elat, elong, clat, clong, distance, count;
     private BroadcastReceiver UpdateUI;
     private Date start, now;
     private Bundle bundle;
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
-    LocalBroadcastManager localBroadcastManager;
-
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private LocalBroadcastManager localBroadcastManager;
+    private MediaPlayer mediaPlayer;
     @Override
     protected void onNewIntent(final Intent intent) {
         super.onNewIntent(intent);
@@ -63,6 +69,11 @@ public class Alert extends Activity {
         editor = sharedPreferences.edit();
         editor.putBoolean(ALERT_ACTIVITY, true);
         editor.apply();
+        vibrate = sharedPreferences.getBoolean(VIBRATOR_ENABLED, false);
+        sound = sharedPreferences.getBoolean(SOUNDS_ENABLED, false);
+        mediaPlayer = MediaPlayer.create(Alert.this, R.raw.alarm);
+        Log.d(TAG, "Vibrate = " + vibrate);
+        Log.d(TAG, "Sound = " + sound);
         bundle = getIntent().getExtras();
         Alert.this.runOnUiThread(new Runnable() {
             public void run() {
@@ -72,27 +83,16 @@ public class Alert extends Activity {
                 UpdateUI = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        String action = intent.getAction();
-                        Log.i(TAG, "Broadcast received: " + action);
-                        if(action.equals("com.alert.broadcast")){
-                            Log.d(TAG, "Hello");
-                        }
-                        Log.d(TAG, "HELLO");
                         if (timerRunning && sharedPreferences.getBoolean(ALERT_ACTIVITY, false)) {
                             countDownTimer.cancel();
                         }
                         bundle = new Bundle();
                         bundle = intent.getExtras();
                         sharedPreferences = getSharedPreferences(SHARED_PREFS, 0);
-                        Log.d(TAG, "Magnitude = " + bundle.getString("Magnitude"));
                         startAlert();
                     }
                 };
                 localBroadcastManager.registerReceiver(UpdateUI, filter);
-
-
-
-
                 WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -113,7 +113,6 @@ public class Alert extends Activity {
                         }
                         if (timerRunning) {
                             countDownTimer.cancel();
-                            Log.d(TAG, "ALERT IS CANCELLED");
                         }
                         editor.putBoolean(ALERT_ACTIVITY, false);
                         editor.apply();
@@ -131,11 +130,9 @@ public class Alert extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (windowManager != null) {
-            windowManager.removeView(alertView);
-        }
         editor.putBoolean(ALERT_ACTIVITY, false);
         editor.apply();
+        mediaPlayer.release();
         Log.d(TAG, "ALERT IS " + sharedPreferences.getBoolean(ALERT_ACTIVITY, false));
         localBroadcastManager.unregisterReceiver(UpdateUI);
     }
@@ -147,7 +144,19 @@ public class Alert extends Activity {
                 counter = millisUntilFinished;
                 min = (int) (counter / 1000) / 60;
                 sec = (int) (counter / 1000) % 60;
-
+                if (vibrate){
+                    Log.d(TAG, "Should be vibrating");
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
+                    } else {
+                        ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(150);
+                    }
+                }
+                if (sound) {
+                    Log.d(TAG, "Should be playing");
+                    mediaPlayer.setLooping(true);
+                    mediaPlayer.start();
+                }
                 String timeLeftFormatted = String.format(Locale.getDefault(), "%01d:%02d", min, sec);
                 timerView.setText(timeLeftFormatted);
                 magnitude.setText(mag);
@@ -191,16 +200,15 @@ public class Alert extends Activity {
     public double calculatePArrival(double distance, int speed, int eStart) {
         double timeLeftPArrival;
         timeLeftPArrival = (distance / speed) - eStart;
-        Log.d(TAG, "P-Arrival = " + timeLeftPArrival);
         if(timeLeftPArrival < 0) return 0;
         else return timeLeftPArrival;
     }
 
     public double calculateSArrival(double distance, int speed, int eStart) {
-        double timeLeftPArrival;
-        timeLeftPArrival = ((distance / speed) - eStart);
-
-        return timeLeftPArrival;
+        double timeLeftSArrival;
+        timeLeftSArrival = (distance / speed) - eStart;
+        if(timeLeftSArrival < 0) return 0;
+        return timeLeftSArrival;
     }
 
     public void startAlert() {
@@ -230,7 +238,7 @@ public class Alert extends Activity {
             e.printStackTrace();
         }
         distance = calculateDistance(elat, elong, clat, clong);
-        count = calculatePArrival(distance, 6, eStart);
+        count = calculateSArrival(distance, 6, eStart);
         counter = Math.round(count) * 1000;
         Log.d(TAG, "Counter = " + counter);
         startTimer();
